@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#4f46e5" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Học Từ Vựng</title>
+</head>
+<body>
+  <header>
+    <h1>📚 Học Từ Vựng</h1>
+  </header>
+
+  <main id="app">
+    <!-- TAB: ÔN TẬP -->
+    <section id="tab-review" class="tab active">
+      <div class="review-toolbar">
+        <button id="btn-practice" class="btn-secondary">🎲 Luyện tập 10 từ ngẫu nhiên</button>
+        <button id="btn-srs" class="btn-secondary hidden">📖 Quay lại ôn theo lịch</button>
+      </div>
+      <div id="review-empty" class="empty hidden">
+        <p>🎉 Không còn từ nào cần ôn hôm nay!</p>
+        <p class="muted">Bấm "Luyện tập 10 từ ngẫu nhiên" ở trên để học thêm, hoặc quay lại sau nhé.</p>
+      </div>
+      <div id="flashcard" class="card hidden">
+        <div class="card-progress"><span id="review-count"></span></div>
+        <div class="card-word" id="fc-word"></div>
+        <div class="card-phonetic" id="fc-phonetic"></div>
+        <button id="btn-show" class="btn-primary">Hiện nghĩa</button>
+        <div id="fc-back" class="card-back hidden">
+          <div class="fc-pos" id="fc-pos"></div>
+          <div class="fc-meaning" id="fc-meaning"></div>
+          <div class="fc-example" id="fc-example"></div>
+          <div class="fc-example-vi" id="fc-example-vi"></div>
+          <div class="grade-buttons" id="grade-buttons">
+            <button data-q="0" class="grade again">Quên</button>
+            <button data-q="3" class="grade hard">Khó</button>
+            <button data-q="4" class="grade good">Được</button>
+            <button data-q="5" class="grade easy">Dễ</button>
+          </div>
+          <button id="btn-next" class="btn-primary hidden">Từ tiếp theo →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: THÊM TỪ -->
+    <section id="tab-add" class="tab">
+      <h2>Nhập từ — DeepSeek tự điền</h2>
+      <div class="row">
+        <input id="gen-input" type="text" placeholder="Nhập từ tiếng Anh, vd: abandon" />
+        <button id="btn-generate" class="btn-primary">Tự điền</button>
+      </div>
+      <div id="gen-status" class="muted"></div>
+
+      <h2>Kiểm tra / sửa rồi lưu</h2>
+      <form id="manual-form">
+        <input name="word" placeholder="Từ (English) *" required />
+        <input name="phonetic" placeholder="Phiên âm /.../" />
+        <input name="part_of_speech" placeholder="Loại từ (n, v, adj...)" />
+        <input name="meaning" placeholder="Nghĩa tiếng Việt" />
+        <input name="example" placeholder="Câu ví dụ" />
+        <input name="example_vi" placeholder="Dịch câu ví dụ" />
+        <button type="submit" class="btn-primary">Lưu từ</button>
+      </form>
+      <div id="manual-status" class="muted"></div>
+    </section>
+
+    <!-- TAB: DANH SÁCH -->
+    <section id="tab-list" class="tab">
+      <h2>Tất cả từ (<span id="list-count">0</span>)</h2>
+      <div id="word-list"></div>
+    </section>
+
+    <!-- TAB: THỐNG KÊ -->
+    <section id="tab-stats" class="tab">
+      <h2>Thống kê</h2>
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Tổng từ</div></div>
+        <div class="stat"><div class="stat-num" id="stat-due">0</div><div class="stat-label">Cần ôn</div></div>
+        <div class="stat"><div class="stat-num" id="stat-learned">0</div><div class="stat-label">Đã thuộc</div></div>
+      </div>
+    </section>
+  </main>
+
+  <nav id="tabbar">
+    <button data-tab="review" class="active">📖 Ôn</button>
+    <button data-tab="add">➕ Thêm</button>
+    <button data-tab="list">📋 Danh sách</button>
+    <button data-tab="stats">📊 Thống kê</button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>

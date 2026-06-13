@@ -1,0 +1,24 @@
+{
+  "name": "Học Từ Vựng Tiếng Anh",
+  "short_name": "Học Từ",
+  "description": "App học từ vựng tiếng Anh với lặp lại ngắt quãng (SRS)",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

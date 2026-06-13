@@ -1,0 +1,11 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+
+# Bí mật & dữ liệu
+backend/.env
+backend/vocab.db
+
+# Cấu hình máy cá nhân
+.claude/settings.local.json

@@ -1,0 +1,43 @@
+"""Lớp truy cập SQLite mỏng — không cần ORM cho app nhỏ này."""
+import sqlite3
+import os
+from contextlib import contextmanager
+
+DB_PATH = os.getenv("DB_PATH", "vocab.db")
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS words (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    word                TEXT NOT NULL,
+    meaning             TEXT NOT NULL DEFAULT '',
+    phonetic            TEXT NOT NULL DEFAULT '',
+    part_of_speech      TEXT NOT NULL DEFAULT '',
+    example             TEXT NOT NULL DEFAULT '',
+    example_vi          TEXT NOT NULL DEFAULT '',
+    -- Các trường cho thuật toán SRS (SM-2)
+    ease_factor         REAL NOT NULL DEFAULT 2.5,
+    interval            INTEGER NOT NULL DEFAULT 0,   -- số ngày tới lần ôn kế
+    repetitions         INTEGER NOT NULL DEFAULT 0,   -- số lần trả lời đúng liên tiếp
+    due_date            TEXT NOT NULL DEFAULT (date('now')),
+    last_reviewed       TEXT,
+    created_at          TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_due_date ON words(due_date);
+"""
+
+
+def init_db():
+    with get_conn() as conn:
+        conn.executescript(SCHEMA)
+
+
+@contextmanager
+def get_conn():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row  # cho phép truy cập theo tên cột
+    try:
+        yield conn
+        conn.commit()
+    finally:
+        conn.close()

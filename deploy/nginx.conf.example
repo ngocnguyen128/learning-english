@@ -1,0 +1,15 @@
+# Reverse proxy mẫu cho Nginx. Đặt vào /etc/nginx/sites-available/ rồi symlink.
+# Sau đó chạy: sudo certbot --nginx -d hoctu.tenmien.com  (để tự cấp HTTPS)
+
+server {
+    listen 80;
+    server_name hoctu.tenmien.com;   # đổi thành domain của bạn
+
+    location / {
+        proxy_pass         http://127.0.0.1:8000;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+}
