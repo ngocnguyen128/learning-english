@@ -24,12 +24,33 @@ CREATE TABLE IF NOT EXISTS words (
 );
 
 CREATE INDEX IF NOT EXISTS idx_due_date ON words(due_date);
+
+-- Lưu trạng thái chung dạng key-value (vd: ngày sinh từ gần nhất)
+CREATE TABLE IF NOT EXISTS meta (
+    key   TEXT PRIMARY KEY,
+    value TEXT
+);
 """
 
 
 def init_db():
     with get_conn() as conn:
         conn.executescript(SCHEMA)
+
+
+def get_meta(key: str, default=None):
+    with get_conn() as conn:
+        row = conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+    return row["value"] if row else default
+
+
+def set_meta(key: str, value: str):
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO meta(key, value) VALUES(?, ?) "
+            "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            (key, value),
+        )
 
 
 @contextmanager

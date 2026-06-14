@@ -208,10 +208,36 @@ function esc(str) {
   );
 }
 
+// ----------------------- Toast thông báo -----------------------
+let toastTimer = null;
+function showToast(msg, ms = 4000) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.remove("hidden");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add("hidden"), ms);
+}
+
+// ----------------------- Sinh từ mới khi mở app -----------------------
+// Chạy nền: hôm nay chưa có thì DeepSeek sinh 10 từ; có rồi thì server tự bỏ qua.
+async function ensureDailyWords() {
+  try {
+    const r = await api("/api/daily/ensure", { method: "POST" });
+    if (r.generated > 0) {
+      showToast(`✨ Đã thêm ${r.generated} từ mới hôm nay!`);
+      if (!practiceMode) loadReview(); // làm mới hàng đợi ôn nếu đang ở chế độ SRS
+    }
+  } catch (e) {
+    // Im lặng — không để lỗi sinh từ làm gián đoạn việc dùng app
+    console.warn("Sinh từ mới thất bại:", e.message);
+  }
+}
+
 // Đăng ký service worker (cho phép cài như app)
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
 }
 
-// Tải tab đầu tiên
+// Tải tab đầu tiên + kiểm tra từ mới của ngày
 loadReview();
+ensureDailyWords();

@@ -16,6 +16,7 @@ from pydantic import BaseModel
 import database
 import srs
 import deepseek
+import daily
 
 app = FastAPI(title="Learning English API")
 
@@ -120,6 +121,15 @@ async def generate(g: GenerateIn):
         )
         row = conn.execute("SELECT * FROM words WHERE id = ?", (cur.lastrowid,)).fetchone()
     return row_to_dict(row)
+
+
+@app.post("/api/daily/ensure")
+async def daily_ensure():
+    """Frontend gọi khi mở app: sinh từ mới của ngày nếu hôm nay chưa sinh."""
+    try:
+        return await daily.run_daily_generation()
+    except deepseek.DeepSeekError as e:
+        raise HTTPException(502, str(e))
 
 
 @app.get("/api/review/next")
