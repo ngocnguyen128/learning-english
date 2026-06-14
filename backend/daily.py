@@ -29,6 +29,12 @@ def today_str() -> str:
     return now.date().isoformat()
 
 
+def now_str() -> str:
+    """Thời điểm hiện tại theo giờ Việt Nam, dạng 'YYYY-MM-DD HH:MM:SS'."""
+    now = datetime.now(_TZ) if _TZ else datetime.utcnow()
+    return now.strftime("%Y-%m-%d %H:%M:%S")
+
+
 async def run_daily_generation(force: bool = False) -> dict:
     """Sinh COUNT từ mới nếu hôm nay chưa sinh. Trả về dict mô tả kết quả."""
     database.init_db()

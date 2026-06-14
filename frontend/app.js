@@ -90,6 +90,20 @@ document.getElementById("btn-show").addEventListener("click", () => {
   document.getElementById("btn-show").classList.add("hidden");
 });
 
+// Phát âm từ bằng giọng đọc của thiết bị (Web Speech API — miễn phí, chạy offline)
+function speak(text) {
+  if (!("speechSynthesis" in window) || !text) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  u.rate = 0.9;
+  speechSynthesis.cancel(); // dừng câu đang đọc nếu có
+  speechSynthesis.speak(u);
+}
+
+document.getElementById("fc-speak").addEventListener("click", () => {
+  if (currentCard) speak(currentCard.word);
+});
+
 // Luyện tập: chỉ lật sang từ kế, KHÔNG cập nhật lịch SRS
 document.getElementById("btn-next").addEventListener("click", () => {
   reviewQueue.shift();
@@ -167,23 +181,56 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
 });
 
 // ----------------------- Danh sách từ -----------------------
+const MASTERED_INTERVAL = 21; // khớp với backend
+let allWords = [];
+let listFilter = "all";
+
+// Phân loại trạng thái 1 từ dựa trên dữ liệu SRS
+function wordStatus(w) {
+  if (!w.last_reviewed) return { key: "new", label: "Mới" };
+  if (w.interval >= MASTERED_INTERVAL) return { key: "mastered", label: "Đã thuộc" };
+  return { key: "learning", label: "Đang học" };
+}
+
 async function loadList() {
-  const words = await api("/api/words");
-  document.getElementById("list-count").textContent = words.length;
+  allWords = await api("/api/words");
+  renderList();
+}
+
+function renderList() {
+  document.getElementById("list-count").textContent = allWords.length;
   const container = document.getElementById("word-list");
+  const words = allWords.filter(
+    (w) => listFilter === "all" || wordStatus(w).key === listFilter
+  );
   container.innerHTML = "";
+  if (words.length === 0) {
+    container.innerHTML = `<p class="muted" style="text-align:center;padding:24px">Không có từ nào.</p>`;
+    return;
+  }
   words.forEach((w) => {
+    const st = wordStatus(w);
     const div = document.createElement("div");
     div.className = "word-item";
     div.innerHTML = `
       <div class="w-head">
-        <div><span class="w-word">${esc(w.word)}</span><span class="w-phon">${esc(w.phonetic)}</span></div>
-        <button class="w-del" data-id="${w.id}">🗑️</button>
+        <div>
+          <span class="w-word">${esc(w.word)}</span>
+          <button class="speak-btn sm" data-speak="${esc(w.word)}" aria-label="Phát âm">🔊</button>
+          <span class="w-phon">${esc(w.phonetic)}</span>
+        </div>
+        <span class="badge ${st.key}">${st.label}</span>
       </div>
       <div class="w-meaning"><b>${esc(w.part_of_speech)}</b> ${esc(w.meaning)}</div>
       ${w.example ? `<div class="w-example">${esc(w.example)}</div>` : ""}
-      <div class="w-due">Ôn lại: ${esc(w.due_date)}</div>`;
+      <div class="w-foot">
+        <span class="w-due">Ôn lại: ${esc(w.due_date)}</span>
+        <button class="w-del" data-id="${w.id}">🗑️</button>
+      </div>`;
     container.appendChild(div);
+  });
+  container.querySelectorAll(".speak-btn").forEach((btn) => {
+    btn.addEventListener("click", () => speak(btn.dataset.speak));
   });
   container.querySelectorAll(".w-del").forEach((btn) => {
     btn.addEventListener("click", async () => {
@@ -194,12 +241,49 @@ async function loadList() {
   });
 }
 
+document.querySelectorAll(".chip").forEach((chip) => {
+  chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+    chip.classList.add("active");
+    listFilter = chip.dataset.filter;
+    renderList();
+  });
+});
+
 // ----------------------- Thống kê -----------------------
 async function loadStats() {
   const s = await api("/api/stats");
   document.getElementById("stat-total").textContent = s.total;
   document.getElementById("stat-due").textContent = s.due;
-  document.getElementById("stat-learned").textContent = s.learned;
+  document.getElementById("stat-mastered").textContent = s.mastered;
+
+  // Tiến độ: số + thanh tỉ lệ
+  document.getElementById("stat-new").textContent = s.new;
+  document.getElementById("stat-learning").textContent = s.learning;
+  document.getElementById("stat-mastered2").textContent = s.mastered;
+  const total = s.total || 1;
+  document.getElementById("prog-bar").innerHTML = `
+    <span class="seg new" style="width:${(s.new / total) * 100}%"></span>
+    <span class="seg learning" style="width:${(s.learning / total) * 100}%"></span>
+    <span class="seg mastered" style="width:${(s.mastered / total) * 100}%"></span>`;
+
+  // Tốc độ học
+  document.getElementById("stat-today").textContent = s.reviewed_today;
+  document.getElementById("stat-streak").textContent = s.streak;
+
+  // Biểu đồ cột 7 ngày
+  const max = Math.max(1, ...s.daily.map((d) => d.count));
+  document.getElementById("chart-7day").innerHTML = s.daily
+    .map((d) => {
+      const h = Math.round((d.count / max) * 100);
+      const dayLabel = d.date.slice(5).replace("-", "/"); // MM/DD -> DD? giữ MM/DD
+      return `<div class="bar-col">
+        <div class="bar-val">${d.count || ""}</div>
+        <div class="bar" style="height:${Math.max(h, 3)}%"></div>
+        <div class="bar-day">${dayLabel}</div>
+      </div>`;
+    })
+    .join("");
 }
 
 function esc(str) {

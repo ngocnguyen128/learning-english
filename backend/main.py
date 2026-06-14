@@ -160,8 +160,17 @@ def submit_review(word_id: int, r: ReviewIn):
                due_date=?, last_reviewed=datetime('now') WHERE id=?""",
             (ef, interval, reps, due, word_id),
         )
+        # Ghi nhật ký ôn (giờ VN) để thống kê tốc độ học
+        conn.execute(
+            "INSERT INTO review_log (word_id, quality, reviewed_at) VALUES (?, ?, ?)",
+            (word_id, r.quality, daily.now_str()),
+        )
         updated = conn.execute("SELECT * FROM words WHERE id = ?", (word_id,)).fetchone()
     return row_to_dict(updated)
+
+
+# Ngưỡng "đã thuộc": từ có khoảng cách ôn >= 21 ngày (giống Anki: mature card)
+MASTERED_INTERVAL = 21
 
 
 @app.get("/api/stats")
@@ -172,10 +181,47 @@ def stats():
         due = conn.execute(
             "SELECT COUNT(*) c FROM words WHERE due_date <= ?", (today,)
         ).fetchone()["c"]
-        learned = conn.execute(
-            "SELECT COUNT(*) c FROM words WHERE repetitions >= 2"
+        new = conn.execute(
+            "SELECT COUNT(*) c FROM words WHERE last_reviewed IS NULL"
         ).fetchone()["c"]
-    return {"total": total, "due": due, "learned": learned}
+        mastered = conn.execute(
+            "SELECT COUNT(*) c FROM words WHERE interval >= ?", (MASTERED_INTERVAL,)
+        ).fetchone()["c"]
+        learning = total - new - mastered
+
+        # Số lượt ôn theo ngày (giờ VN) — gom theo 10 ký tự đầu 'YYYY-MM-DD'
+        rows = conn.execute(
+            "SELECT substr(reviewed_at,1,10) d, COUNT(*) c FROM review_log GROUP BY d"
+        ).fetchall()
+
+    by_day = {r["d"]: r["c"] for r in rows}
+    vn_today = daily.today_str()
+
+    # Mảng 7 ngày gần nhất (cũ -> mới) cho biểu đồ
+    from datetime import date as _date, timedelta
+    base = _date.fromisoformat(vn_today)
+    daily_series = []
+    for i in range(6, -1, -1):
+        d = (base - timedelta(days=i)).isoformat()
+        daily_series.append({"date": d, "count": by_day.get(d, 0)})
+
+    reviewed_today = by_day.get(vn_today, 0)
+
+    # Chuỗi ngày học liên tiếp (tính tới hôm nay, hoặc hôm qua nếu hôm nay chưa học)
+    streak = 0
+    cur = base
+    if by_day.get(vn_today, 0) == 0:
+        cur = base - timedelta(days=1)  # cho phép giữ streak nếu hôm nay chưa ôn
+    while by_day.get(cur.isoformat(), 0) > 0:
+        streak += 1
+        cur = cur - timedelta(days=1)
+
+    return {
+        "total": total, "due": due,
+        "new": new, "learning": learning, "mastered": mastered,
+        "reviewed_today": reviewed_today, "streak": streak,
+        "daily": daily_series,
+    }
 
 
 # --------------------- Phục vụ frontend PWA ---------------------------

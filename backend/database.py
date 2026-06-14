@@ -30,6 +30,16 @@ CREATE TABLE IF NOT EXISTS meta (
     key   TEXT PRIMARY KEY,
     value TEXT
 );
+
+-- Nhật ký mỗi lần ôn (để thống kê tốc độ học)
+CREATE TABLE IF NOT EXISTS review_log (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    word_id     INTEGER NOT NULL,
+    quality     INTEGER NOT NULL,
+    reviewed_at TEXT NOT NULL          -- giờ Việt Nam, dạng 'YYYY-MM-DD HH:MM:SS'
+);
+
+CREATE INDEX IF NOT EXISTS idx_log_date ON review_log(reviewed_at);
 """
 
 

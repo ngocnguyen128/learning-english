@@ -31,7 +31,10 @@
       </div>
       <div id="flashcard" class="card hidden">
         <div class="card-progress"><span id="review-count"></span></div>
-        <div class="card-word" id="fc-word"></div>
+        <div class="word-row">
+          <div class="card-word" id="fc-word"></div>
+          <button id="fc-speak" class="speak-btn" aria-label="Phát âm">🔊</button>
+        </div>
         <div class="card-phonetic" id="fc-phonetic"></div>
         <button id="btn-show" class="btn-primary">Hiện nghĩa</button>
         <div id="fc-back" class="card-back hidden">
@@ -75,16 +78,42 @@
     <!-- TAB: DANH SÁCH -->
     <section id="tab-list" class="tab">
       <h2>Tất cả từ (<span id="list-count">0</span>)</h2>
+      <div class="filter-chips">
+        <button class="chip active" data-filter="all">Tất cả</button>
+        <button class="chip" data-filter="new">Mới</button>
+        <button class="chip" data-filter="learning">Đang học</button>
+        <button class="chip" data-filter="mastered">Đã thuộc</button>
+      </div>
       <div id="word-list"></div>
     </section>
 
     <!-- TAB: THỐNG KÊ -->
     <section id="tab-stats" class="tab">
-      <h2>Thống kê</h2>
+      <h2>Tổng quan</h2>
       <div class="stats-grid">
         <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Tổng từ</div></div>
+        <div class="stat"><div class="stat-num" id="stat-mastered">0</div><div class="stat-label">Đã thuộc</div></div>
         <div class="stat"><div class="stat-num" id="stat-due">0</div><div class="stat-label">Cần ôn</div></div>
-        <div class="stat"><div class="stat-num" id="stat-learned">0</div><div class="stat-label">Đã thuộc</div></div>
+      </div>
+
+      <h2>Tiến độ</h2>
+      <div class="info-card">
+        <div class="prog-bar" id="prog-bar"></div>
+        <div class="prog-legend">
+          <span><span class="dot new"></span>Mới <b id="stat-new">0</b></span>
+          <span><span class="dot learning"></span>Đang học <b id="stat-learning">0</b></span>
+          <span><span class="dot mastered"></span>Đã thuộc <b id="stat-mastered2">0</b></span>
+        </div>
+      </div>
+
+      <h2>Tốc độ học</h2>
+      <div class="info-card">
+        <div class="speed-top">
+          <div><div class="speed-num" id="stat-today">0</div><div class="stat-label">Lượt ôn hôm nay</div></div>
+          <div><div class="speed-num" id="stat-streak">0</div><div class="stat-label">🔥 Chuỗi ngày</div></div>
+        </div>
+        <div class="chart" id="chart-7day"></div>
+        <div class="chart-caption">Số lượt ôn — 7 ngày gần nhất</div>
       </div>
     </section>
   </main>
