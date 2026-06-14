@@ -75,9 +75,8 @@ def _normalize(result: dict, fallback_word: str = "") -> dict:
     }
 
 
-BATCH_PROMPT = """Bạn là giáo viên tiếng Anh chuyên ngành.
-Hãy đưa ra {count} từ hoặc cụm từ tiếng Anh MỚI, hữu ích, thuộc lĩnh vực: {topic}.
-Ưu tiên thuật ngữ chuyên môn thật sự dùng trong ngành (không phải từ phổ thông cơ bản).
+BATCH_PROMPT = """Bạn là giáo viên tiếng Anh.
+Hãy đưa ra {count} từ hoặc cụm từ tiếng Anh MỚI, hữu ích, phù hợp đúng yêu cầu sau: {topic}.
 {avoid_clause}
 Trả về DUY NHẤT một object JSON dạng:
 {{"words": [

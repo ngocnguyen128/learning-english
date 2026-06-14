@@ -4,17 +4,17 @@ và script chạy tay daily_words.py.
 Quy tắc: mỗi NGÀY (theo giờ Việt Nam) chỉ sinh tối đa 1 lần. Việc gọi do
 frontend kích hoạt khi mở app, nên ngày nào không mở app thì không sinh gì.
 """
-import os
 from datetime import datetime
 
 import database
 import deepseek
 
-TOPIC = os.getenv(
-    "DAILY_TOPIC",
-    "Data / phân tích dữ liệu (data analytics, data engineering) VÀ Ngân hàng / tài chính (banking, finance)",
-)
-COUNT = int(os.getenv("DAILY_COUNT", "10"))
+# Mỗi ngày sinh theo các nhóm (chủ đề, số từ). Tổng hiện tại = 10 từ/ngày.
+SEGMENTS = [
+    ("thuật ngữ Ngân hàng / tài chính (banking & finance), ưu tiên từ chuyên ngành thật sự dùng trong ngành", 3),
+    ("thuật ngữ Data / phân tích & kỹ thuật dữ liệu (data analytics & engineering), ưu tiên từ chuyên ngành", 3),
+    ("từ tiếng Anh THÔNG DỤNG hằng ngày thuộc bộ Oxford 3000, trình độ A2–B2, dùng trong giao tiếp đời thường; KHÔNG phải thuật ngữ chuyên ngành", 4),
+]
 
 # Mốc "ngày" tính theo giờ Việt Nam để khớp trải nghiệm người dùng
 try:
@@ -36,7 +36,7 @@ def now_str() -> str:
 
 
 async def run_daily_generation(force: bool = False) -> dict:
-    """Sinh COUNT từ mới nếu hôm nay chưa sinh. Trả về dict mô tả kết quả."""
+    """Sinh từ mới theo các nhóm SEGMENTS nếu hôm nay chưa sinh."""
     database.init_db()
     today = today_str()
 
@@ -46,23 +46,31 @@ async def run_daily_generation(force: bool = False) -> dict:
     with database.get_conn() as conn:
         existing = [r["word"].lower() for r in conn.execute("SELECT word FROM words").fetchall()]
 
-    words = await deepseek.generate_batch(TOPIC, COUNT, avoid=existing)
-
     added = 0
-    with database.get_conn() as conn:
-        for w in words:
-            key = w["word"].lower()
-            if not key or key in existing:
-                continue
-            conn.execute(
-                """INSERT INTO words (word, meaning, phonetic, part_of_speech, example, example_vi)
-                   VALUES (?, ?, ?, ?, ?, ?)""",
-                (w["word"], w["meaning"], w["phonetic"],
-                 w["part_of_speech"], w["example"], w["example_vi"]),
-            )
-            existing.append(key)
-            added += 1
+    last_error = None
+    for topic, count in SEGMENTS:
+        try:
+            words = await deepseek.generate_batch(topic, count, avoid=existing)
+        except deepseek.DeepSeekError as e:
+            last_error = e  # 1 nhóm lỗi thì bỏ qua, vẫn thử các nhóm còn lại
+            continue
+        with database.get_conn() as conn:
+            for w in words:
+                key = w["word"].lower()
+                if not key or key in existing:
+                    continue
+                conn.execute(
+                    """INSERT INTO words (word, meaning, phonetic, part_of_speech, example, example_vi)
+                       VALUES (?, ?, ?, ?, ?, ?)""",
+                    (w["word"], w["meaning"], w["phonetic"],
+                     w["part_of_speech"], w["example"], w["example_vi"]),
+                )
+                existing.append(key)
+                added += 1
 
-    # Đánh dấu đã sinh hôm nay (kể cả khi added=0 do trùng) để không lặp lại trong ngày
+    # Nếu KHÔNG sinh được gì do lỗi: không đánh dấu để lần mở sau thử lại
+    if added == 0 and last_error:
+        raise last_error
+
     database.set_meta("last_gen_date", today)
     return {"generated": added, "skipped": False, "reason": ""}
