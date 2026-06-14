@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS words (
     part_of_speech      TEXT NOT NULL DEFAULT '',
     example             TEXT NOT NULL DEFAULT '',
     example_vi          TEXT NOT NULL DEFAULT '',
+    known               INTEGER NOT NULL DEFAULT 0,   -- 1 = đã thuộc, bỏ qua khỏi ôn
     -- Các trường cho thuật toán SRS (SM-2)
     ease_factor         REAL NOT NULL DEFAULT 2.5,
     interval            INTEGER NOT NULL DEFAULT 0,   -- số ngày tới lần ôn kế
@@ -46,6 +47,10 @@ CREATE INDEX IF NOT EXISTS idx_log_date ON review_log(reviewed_at);
 def init_db():
     with get_conn() as conn:
         conn.executescript(SCHEMA)
+        # Migration: thêm cột 'known' cho DB cũ chưa có
+        cols = [r["name"] for r in conn.execute("PRAGMA table_info(words)").fetchall()]
+        if "known" not in cols:
+            conn.execute("ALTER TABLE words ADD COLUMN known INTEGER NOT NULL DEFAULT 0")
 
 
 def get_meta(key: str, default=None):

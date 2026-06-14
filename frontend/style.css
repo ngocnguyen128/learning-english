@@ -196,6 +196,22 @@ input:focus {
 .grade.easy  { background: #46938a; }
 #btn-next { margin-top: 28px; }
 
+/* Nút "Đã thuộc — bỏ qua" trong thẻ ôn */
+.btn-skip {
+  margin-top: 14px;
+  background: none;
+  border: none;
+  color: var(--label-2);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.btn-skip:active { color: var(--accent); }
+
 .empty { text-align: center; padding: 70px 20px; }
 .empty p { margin: 10px 0; font-size: 1.1rem; }
 
@@ -231,6 +247,20 @@ input:focus {
 .w-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
 .w-due { font-size: 0.75rem; color: var(--label-2); }
 .word-item .w-del { background: none; border: none; color: #c75b4a; cursor: pointer; font-size: 1.1rem; padding: 4px; }
+.w-actions { display: flex; align-items: center; gap: 8px; }
+.w-known {
+  background: none;
+  border: 1px solid var(--sep);
+  color: var(--label-2);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.w-known:active { background: color-mix(in srgb, var(--accent) 12%, transparent); }
 
 /* Badge trạng thái */
 .badge { font-size: 0.7rem; font-weight: 600; padding: 4px 11px; border-radius: 20px; white-space: nowrap; }

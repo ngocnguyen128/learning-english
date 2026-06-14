@@ -89,8 +89,9 @@ function showNextCard() {
   document.getElementById("fc-example").textContent = currentCard.example || "";
   document.getElementById("fc-example-vi").textContent = currentCard.example_vi || "";
 
-  // Chế độ luyện tập: chỉ có nút "Tiếp"; chế độ ôn: 4 nút chấm điểm SRS
+  // Chế độ luyện tập: chỉ có nút "Tiếp"; chế độ ôn: 4 nút chấm điểm SRS + nút "Đã thuộc"
   document.getElementById("grade-buttons").classList.toggle("hidden", practiceMode);
+  document.getElementById("btn-known").classList.toggle("hidden", practiceMode);
   document.getElementById("btn-next").classList.toggle("hidden", !practiceMode);
 
   document.getElementById("fc-back").classList.add("hidden");
@@ -117,6 +118,18 @@ function speak(text) {
 
 document.getElementById("fc-speak").addEventListener("click", () => {
   if (currentCard) speak(currentCard.word);
+});
+
+// Đánh dấu từ hiện tại là "đã thuộc" → bỏ qua khỏi hàng đợi ôn
+document.getElementById("btn-known").addEventListener("click", async () => {
+  if (!currentCard) return;
+  await api(`/api/words/${currentCard.id}/known`, {
+    method: "POST",
+    body: JSON.stringify({ known: true }),
+  });
+  showToast("✓ Đã đánh dấu thuộc, bỏ qua từ này");
+  reviewQueue.shift();
+  showNextCard();
 });
 
 // Luyện tập: chỉ lật sang từ kế, KHÔNG cập nhật lịch SRS
@@ -202,6 +215,7 @@ let listFilter = "all";
 
 // Phân loại trạng thái 1 từ dựa trên dữ liệu SRS
 function wordStatus(w) {
+  if (w.known) return { key: "mastered", label: "Đã thuộc" };
   if (!w.last_reviewed) return { key: "new", label: "Mới" };
   if (w.interval >= MASTERED_INTERVAL) return { key: "mastered", label: "Đã thuộc" };
   return { key: "learning", label: "Đang học" };
@@ -239,13 +253,28 @@ function renderList() {
       <div class="w-meaning"><b>${esc(w.part_of_speech)}</b> ${esc(w.meaning)}</div>
       ${w.example ? `<div class="w-example">${esc(w.example)}</div>` : ""}
       <div class="w-foot">
-        <span class="w-due">Ôn lại: ${esc(w.due_date)}</span>
-        <button class="w-del" data-id="${w.id}">🗑️</button>
+        <span class="w-due">${w.known ? "Đã bỏ qua" : "Ôn lại: " + esc(w.due_date)}</span>
+        <div class="w-actions">
+          <button class="w-known" data-id="${w.id}" data-known="${w.known ? 1 : 0}">
+            ${w.known ? "↩ Cần học" : "✓ Đã thuộc"}
+          </button>
+          <button class="w-del" data-id="${w.id}">🗑️</button>
+        </div>
       </div>`;
     container.appendChild(div);
   });
   container.querySelectorAll(".speak-btn").forEach((btn) => {
     btn.addEventListener("click", () => speak(btn.dataset.speak));
+  });
+  container.querySelectorAll(".w-known").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const makeKnown = btn.dataset.known === "0"; // đang chưa thuộc → đánh dấu thuộc
+      await api(`/api/words/${btn.dataset.id}/known`, {
+        method: "POST",
+        body: JSON.stringify({ known: makeKnown }),
+      });
+      loadList();
+    });
   });
   container.querySelectorAll(".w-del").forEach((btn) => {
     btn.addEventListener("click", async () => {

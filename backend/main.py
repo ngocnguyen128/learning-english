@@ -69,12 +69,36 @@ def list_words():
 
 @app.get("/api/words/random")
 def random_words(limit: int = 10):
-    """Bốc ngẫu nhiên N từ trong kho để luyện tập tự do (không liên quan SRS)."""
+    """Bốc ngẫu nhiên N từ (bỏ qua từ đã đánh dấu thuộc) để luyện tập tự do."""
     with database.get_conn() as conn:
         rows = conn.execute(
-            "SELECT * FROM words ORDER BY RANDOM() LIMIT ?", (limit,)
+            "SELECT * FROM words WHERE known = 0 ORDER BY RANDOM() LIMIT ?", (limit,)
         ).fetchall()
     return [row_to_dict(r) for r in rows]
+
+
+class KnownIn(BaseModel):
+    known: bool
+
+
+@app.post("/api/words/{word_id}/known")
+def set_known(word_id: int, k: KnownIn):
+    """Đánh dấu một từ là đã thuộc (bỏ qua khỏi ôn) hoặc đưa lại vào học."""
+    with database.get_conn() as conn:
+        row = conn.execute("SELECT * FROM words WHERE id = ?", (word_id,)).fetchone()
+        if not row:
+            raise HTTPException(404, "Không tìm thấy từ")
+        if k.known:
+            conn.execute("UPDATE words SET known = 1 WHERE id = ?", (word_id,))
+        else:
+            # "Cần học": bỏ đánh dấu thuộc + đưa về ôn lại từ đầu, đến hạn ngay hôm nay
+            conn.execute(
+                "UPDATE words SET known = 0, interval = 0, repetitions = 0, "
+                "due_date = date('now') WHERE id = ?",
+                (word_id,),
+            )
+        updated = conn.execute("SELECT * FROM words WHERE id = ?", (word_id,)).fetchone()
+    return row_to_dict(updated)
 
 
 @app.post("/api/words")
@@ -138,7 +162,7 @@ def review_next():
     today = date.today().isoformat()
     with database.get_conn() as conn:
         rows = conn.execute(
-            "SELECT * FROM words WHERE due_date <= ? ORDER BY due_date ASC",
+            "SELECT * FROM words WHERE due_date <= ? AND known = 0 ORDER BY due_date ASC",
             (today,),
         ).fetchall()
     return [row_to_dict(r) for r in rows]
@@ -179,13 +203,15 @@ def stats():
     with database.get_conn() as conn:
         total = conn.execute("SELECT COUNT(*) c FROM words").fetchone()["c"]
         due = conn.execute(
-            "SELECT COUNT(*) c FROM words WHERE due_date <= ?", (today,)
+            "SELECT COUNT(*) c FROM words WHERE due_date <= ? AND known = 0", (today,)
         ).fetchone()["c"]
         new = conn.execute(
-            "SELECT COUNT(*) c FROM words WHERE last_reviewed IS NULL"
+            "SELECT COUNT(*) c FROM words WHERE last_reviewed IS NULL AND known = 0"
         ).fetchone()["c"]
+        # Đã thuộc = tự đạt khoảng cách >= 21 ngày HOẶC người dùng tự đánh dấu thuộc
         mastered = conn.execute(
-            "SELECT COUNT(*) c FROM words WHERE interval >= ?", (MASTERED_INTERVAL,)
+            "SELECT COUNT(*) c FROM words WHERE known = 1 OR interval >= ?",
+            (MASTERED_INTERVAL,),
         ).fetchone()["c"]
         learning = total - new - mastered
 
