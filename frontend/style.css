@@ -196,21 +196,24 @@ input:focus {
 .grade.easy  { background: #46938a; }
 #btn-next { margin-top: 28px; }
 
-/* Nút "Đã thuộc — bỏ qua" trong thẻ ôn */
+/* Hàng nút đánh dấu "Đã thuộc / Cần học lại" trong thẻ ôn & luyện tập */
+.mark-buttons { display: flex; gap: 10px; margin-top: 16px; }
 .btn-skip {
-  margin-top: 14px;
+  flex: 1;
   background: none;
-  border: none;
+  border: 1px solid var(--sep);
+  border-radius: 999px;
   color: var(--label-2);
   font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 8px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  padding: 11px 8px;
+  transition: transform 0.12s ease;
 }
-.btn-skip:active { color: var(--accent); }
+.btn-skip:active { transform: scale(0.96); }
+#btn-known { color: var(--green); border-color: color-mix(in srgb, var(--green) 40%, var(--sep)); }
+#btn-relearn { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--sep)); }
 
 .empty { text-align: center; padding: 70px 20px; }
 .empty p { margin: 10px 0; font-size: 1.1rem; }

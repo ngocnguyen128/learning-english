@@ -1,5 +1,5 @@
 // Service worker đơn giản — cache vỏ app để mở được khi offline.
-const CACHE = "vocab-v8";
+const CACHE = "vocab-v9";
 const ASSETS = [
   "./",
   "index.html",

@@ -89,10 +89,11 @@ function showNextCard() {
   document.getElementById("fc-example").textContent = currentCard.example || "";
   document.getElementById("fc-example-vi").textContent = currentCard.example_vi || "";
 
-  // Chế độ luyện tập: chỉ có nút "Tiếp"; chế độ ôn: 4 nút chấm điểm SRS + nút "Đã thuộc"
+  // Luyện tập: nút "Tiếp"; Ôn: 4 nút chấm điểm SRS.
+  // Nút đánh dấu "Đã thuộc / Cần học lại" hiện ở CẢ hai chế độ.
   document.getElementById("grade-buttons").classList.toggle("hidden", practiceMode);
-  document.getElementById("btn-known").classList.toggle("hidden", practiceMode);
   document.getElementById("btn-next").classList.toggle("hidden", !practiceMode);
+  document.getElementById("mark-buttons").classList.remove("hidden");
 
   document.getElementById("fc-back").classList.add("hidden");
   document.getElementById("btn-show").classList.remove("hidden");
@@ -120,7 +121,7 @@ document.getElementById("fc-speak").addEventListener("click", () => {
   if (currentCard) speak(currentCard.word);
 });
 
-// Đánh dấu từ hiện tại là "đã thuộc" → bỏ qua khỏi hàng đợi ôn
+// Đánh dấu từ hiện tại là "đã thuộc" → bỏ qua khỏi hàng đợi ôn/luyện tập
 document.getElementById("btn-known").addEventListener("click", async () => {
   if (!currentCard) return;
   await api(`/api/words/${currentCard.id}/known`, {
@@ -128,6 +129,18 @@ document.getElementById("btn-known").addEventListener("click", async () => {
     body: JSON.stringify({ known: true }),
   });
   showToast("✓ Đã đánh dấu thuộc, bỏ qua từ này");
+  reviewQueue.shift();
+  showNextCard();
+});
+
+// Đánh dấu "cần học lại" → đưa từ về ôn lại từ đầu
+document.getElementById("btn-relearn").addEventListener("click", async () => {
+  if (!currentCard) return;
+  await api(`/api/words/${currentCard.id}/known`, {
+    method: "POST",
+    body: JSON.stringify({ known: false }),
+  });
+  showToast("↻ Sẽ học lại từ này từ đầu");
   reviewQueue.shift();
   showNextCard();
 });
