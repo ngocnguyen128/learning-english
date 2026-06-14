@@ -4,8 +4,8 @@
   "description": "App học từ vựng tiếng Anh với lặp lại ngắt quãng (SRS)",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f2f2f7",
-  "theme_color": "#f2f2f7",
+  "background_color": "#f6eee0",
+  "theme_color": "#f6eee0",
   "orientation": "portrait",
   "icons": [
     {

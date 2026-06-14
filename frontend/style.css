@@ -1,61 +1,75 @@
-/* ===== Phong cách iOS / Apple — sáng & tối tự động ===== */
+/* ===== Phong cách Echoly — kem ấm, cam đất, nâu espresso, serif editorial ===== */
 :root {
-  --blue: #007aff;
-  --blue-press: #0066d6;
-  --bg: #f2f2f7;
-  --card: #ffffff;
-  --input-bg: #ffffff;
-  --label: #1c1c1e;
-  --label-2: #8e8e93;
-  --sep: rgba(60, 60, 67, 0.16);
-  --red: #ff3b30;
-  --orange: #ff9500;
-  --green: #34c759;
-  --header-bg: rgba(242, 242, 247, 0.8);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.05);
-  --radius: 18px;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
+
+  --accent: #ec6a2c;          /* cam đất */
+  --accent-press: #d4571d;
+  --dark: #2b2520;            /* nâu espresso */
+  --bg: #f6eee0;             /* nền kem ấm */
+  --card: #fdfaf4;           /* thẻ kem sáng hơn nền */
+  --input-bg: #fdfaf4;
+  --label: #2b2520;          /* chữ chính nâu đậm */
+  --label-2: #93887a;        /* chữ phụ taupe ấm */
+  --sep: rgba(70, 55, 40, 0.12);
+  --green: #7a9e5e;          /* xanh ô liu ấm */
+
+  --btn-bg: #2b2520;          /* nút chính: nâu đậm */
+  --btn-fg: #fdfaf4;
+  --header-bg: rgba(246, 238, 224, 0.82);
+  --shadow: 0 1px 2px rgba(70, 50, 30, 0.04), 0 10px 30px rgba(70, 50, 30, 0.06);
+  --radius: 20px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --blue: #0a84ff;
-    --blue-press: #409cff;
-    --bg: #000000;
-    --card: #1c1c1e;
-    --input-bg: #1c1c1e;
-    --label: #ffffff;
-    --label-2: #98989f;
-    --sep: rgba(84, 84, 88, 0.55);
-    --header-bg: rgba(0, 0, 0, 0.7);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --accent: #f2783c;
+    --accent-press: #e0692e;
+    --dark: #f2eadd;
+    --bg: #1c1814;            /* nâu đen ấm */
+    --card: #272019;
+    --input-bg: #272019;
+    --label: #f2eadd;
+    --label-2: #a89c8c;
+    --sep: rgba(255, 248, 235, 0.12);
+    --green: #8fb06e;
+
+    --btn-bg: #f2eadd;         /* nút chính đảo sáng trên nền tối */
+    --btn-fg: #1c1814;
+    --header-bg: rgba(28, 24, 20, 0.82);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   background: var(--bg);
   color: var(--label);
   padding-bottom: 88px;
   -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
-  letter-spacing: -0.01em;
 }
 
-/* Header kính mờ */
+/* Header */
 header {
   position: sticky;
   top: 0;
   z-index: 10;
   background: var(--header-bg);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(160%) blur(20px);
+  backdrop-filter: saturate(160%) blur(20px);
   border-bottom: 0.5px solid var(--sep);
   padding: 16px 20px;
   text-align: center;
 }
-header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+header h1 {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
 
 main { padding: 16px; max-width: 600px; margin: 0 auto; }
 
@@ -64,10 +78,10 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 h2 {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin: 22px 8px 8px;
+  letter-spacing: 0.06em;
+  margin: 24px 6px 10px;
   color: var(--label-2);
   font-weight: 600;
 }
@@ -76,8 +90,8 @@ h2 {
 input, form input {
   width: 100%;
   padding: 14px 16px;
-  border: 0.5px solid var(--sep);
-  border-radius: 12px;
+  border: 1px solid var(--sep);
+  border-radius: 14px;
   font-size: 1rem;
   font-family: inherit;
   margin-bottom: 10px;
@@ -89,33 +103,33 @@ input, form input {
 input::placeholder { color: var(--label-2); }
 input:focus {
   outline: none;
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 18%, transparent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
-/* Buttons */
+/* Buttons — nút chính dạng viên thuốc nâu đậm */
 .btn-primary {
-  background: var(--blue);
-  color: #fff;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
   border: none;
-  padding: 15px 20px;
-  border-radius: 14px;
+  padding: 15px 24px;
+  border-radius: 999px;
   font-size: 1.05rem;
   font-family: inherit;
   font-weight: 600;
   cursor: pointer;
   width: 100%;
-  transition: transform 0.12s ease, background 0.2s;
+  transition: transform 0.12s ease, opacity 0.2s;
 }
-.btn-primary:active { transform: scale(0.97); background: var(--blue-press); }
+.btn-primary:active { transform: scale(0.97); opacity: 0.9; }
 
 .btn-secondary {
   background: var(--card);
-  color: var(--blue);
-  border: none;
+  color: var(--label);
+  border: 1px solid var(--sep);
   box-shadow: var(--shadow);
   padding: 14px 18px;
-  border-radius: 14px;
+  border-radius: 999px;
   font-size: 1rem;
   font-family: inherit;
   font-weight: 600;
@@ -128,7 +142,7 @@ input:focus {
 
 .row { display: flex; gap: 10px; }
 .row input { flex: 1; margin-bottom: 0; }
-.row .btn-primary { width: auto; white-space: nowrap; }
+.row .btn-primary { width: auto; white-space: nowrap; padding: 14px 22px; }
 
 .muted { color: var(--label-2); font-size: 0.85rem; margin: 10px 4px; }
 .hidden { display: none !important; }
@@ -136,10 +150,11 @@ input:focus {
 /* Flashcard */
 .card {
   background: var(--card);
-  border-radius: 24px;
+  border-radius: var(--radius);
   padding: 40px 24px;
   text-align: center;
   box-shadow: var(--shadow);
+  border: 1px solid var(--sep);
   margin-top: 16px;
   animation: cardIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -148,11 +163,17 @@ input:focus {
   to { opacity: 1; transform: none; }
 }
 .card-progress { color: var(--label-2); font-size: 0.8rem; margin-bottom: 20px; font-weight: 500; }
-.card-word { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.03em; }
+.word-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.card-word {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
 .card-phonetic { color: var(--label-2); margin: 10px 0 28px; font-size: 1.15rem; }
-.card-back { margin-top: 22px; border-top: 0.5px solid var(--sep); padding-top: 22px; }
-.fc-pos { color: var(--blue); font-weight: 600; font-size: 0.9rem; }
-.fc-meaning { font-size: 1.5rem; font-weight: 600; margin: 8px 0; letter-spacing: -0.02em; }
+.card-back { margin-top: 22px; border-top: 1px solid var(--sep); padding-top: 22px; }
+.fc-pos { color: var(--accent); font-weight: 600; font-size: 0.9rem; }
+.fc-meaning { font-size: 1.5rem; font-weight: 600; margin: 8px 0; letter-spacing: -0.01em; }
 .fc-example { font-style: italic; margin-top: 14px; line-height: 1.5; }
 .fc-example-vi { color: var(--label-2); margin-top: 6px; line-height: 1.5; }
 
@@ -169,42 +190,19 @@ input:focus {
   transition: transform 0.12s ease;
 }
 .grade:active { transform: scale(0.94); }
-.grade.again { background: var(--red); }
-.grade.hard  { background: var(--orange); }
-.grade.good  { background: var(--green); }
-.grade.easy  { background: var(--blue); }
+.grade.again { background: #c75b4a; }
+.grade.hard  { background: #e0913f; }
+.grade.good  { background: #7a9e5e; }
+.grade.easy  { background: #46938a; }
 #btn-next { margin-top: 28px; }
 
 .empty { text-align: center; padding: 70px 20px; }
 .empty p { margin: 10px 0; font-size: 1.1rem; }
 
-/* Word list */
-.word-item {
-  background: var(--card);
-  border-radius: 16px;
-  padding: 16px 18px;
-  margin-bottom: 10px;
-  box-shadow: var(--shadow);
-}
-.word-item .w-head { display: flex; justify-content: space-between; align-items: baseline; }
-.word-item .w-word { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; }
-.word-item .w-phon { color: var(--label-2); font-size: 0.85rem; margin-left: 8px; }
-.word-item .w-meaning { margin-top: 5px; line-height: 1.4; }
-.word-item .w-example { font-style: italic; color: var(--label-2); font-size: 0.85rem; margin-top: 6px; }
-.word-item .w-del { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.1rem; padding: 4px; }
-.w-due { font-size: 0.75rem; color: var(--label-2); margin-top: 8px; }
-
-/* Stats */
-.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
-.stat { background: var(--card); border-radius: 18px; padding: 24px 8px; text-align: center; box-shadow: var(--shadow); }
-.stat-num { font-size: 2.3rem; font-weight: 700; color: var(--blue); letter-spacing: -0.03em; }
-.stat-label { color: var(--label-2); font-size: 0.78rem; margin-top: 6px; font-weight: 500; }
-
 /* Nút phát âm */
-.word-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
 .speak-btn {
-  background: color-mix(in srgb, var(--blue) 12%, transparent);
-  color: var(--blue);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
   border: none;
   width: 38px; height: 38px;
   border-radius: 50%;
@@ -216,23 +214,38 @@ input:focus {
 .speak-btn:active { transform: scale(0.9); }
 .speak-btn.sm { width: 28px; height: 28px; font-size: 0.85rem; margin: 0 6px; vertical-align: middle; }
 
-/* Badge trạng thái */
-.badge { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
-.badge.new { background: color-mix(in srgb, var(--label-2) 18%, transparent); color: var(--label-2); }
-.badge.learning { background: color-mix(in srgb, var(--blue) 15%, transparent); color: var(--blue); }
-.badge.mastered { background: color-mix(in srgb, var(--green) 18%, transparent); color: var(--green); }
-
+/* Word list */
+.word-item {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--sep);
+}
+.word-item .w-head { display: flex; justify-content: space-between; align-items: center; }
+.word-item .w-word { font-family: var(--font-serif); font-weight: 600; font-size: 1.15rem; }
+.word-item .w-phon { color: var(--label-2); font-size: 0.85rem; margin-left: 8px; }
+.word-item .w-meaning { margin-top: 5px; line-height: 1.4; }
+.word-item .w-example { font-style: italic; color: var(--label-2); font-size: 0.85rem; margin-top: 6px; }
 .w-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-.w-foot .w-due { margin-top: 0; }
+.w-due { font-size: 0.75rem; color: var(--label-2); }
+.word-item .w-del { background: none; border: none; color: #c75b4a; cursor: pointer; font-size: 1.1rem; padding: 4px; }
+
+/* Badge trạng thái */
+.badge { font-size: 0.7rem; font-weight: 600; padding: 4px 11px; border-radius: 20px; white-space: nowrap; }
+.badge.new { background: color-mix(in srgb, var(--label-2) 18%, transparent); color: var(--label-2); }
+.badge.learning { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+.badge.mastered { background: color-mix(in srgb, var(--green) 22%, transparent); color: var(--green); }
 
 /* Bộ lọc chips */
 .filter-chips { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; }
 .chip {
   background: var(--card);
-  border: 0.5px solid var(--sep);
+  border: 1px solid var(--sep);
   color: var(--label);
-  padding: 7px 14px;
-  border-radius: 20px;
+  padding: 7px 16px;
+  border-radius: 999px;
   font-size: 0.85rem;
   font-family: inherit;
   font-weight: 500;
@@ -240,34 +253,38 @@ input:focus {
   cursor: pointer;
   transition: all 0.15s;
 }
-.chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.chip.active { background: var(--dark); color: var(--btn-fg); border-color: var(--dark); }
 
-/* Thẻ thông tin (tiến độ, tốc độ) */
-.info-card { background: var(--card); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); }
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+.stat { background: var(--card); border-radius: 18px; padding: 22px 8px; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--sep); }
+.stat-num { font-family: var(--font-serif); font-size: 2.2rem; font-weight: 600; color: var(--accent); letter-spacing: -0.02em; }
+.stat-label { color: var(--label-2); font-size: 0.76rem; margin-top: 6px; font-weight: 500; }
+
+.info-card { background: var(--card); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); border: 1px solid var(--sep); }
 
 /* Thanh tiến độ tỉ lệ */
-.prog-bar { display: flex; height: 14px; border-radius: 8px; overflow: hidden; background: color-mix(in srgb, var(--label-2) 12%, transparent); }
+.prog-bar { display: flex; height: 14px; border-radius: 8px; overflow: hidden; background: color-mix(in srgb, var(--label-2) 14%, transparent); }
 .prog-bar .seg { display: block; height: 100%; }
 .prog-bar .seg.new { background: var(--label-2); }
-.prog-bar .seg.learning { background: var(--blue); }
+.prog-bar .seg.learning { background: var(--accent); }
 .prog-bar .seg.mastered { background: var(--green); }
 .prog-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; font-size: 0.85rem; color: var(--label-2); }
 .prog-legend b { color: var(--label); margin-left: 2px; }
 .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
 .dot.new { background: var(--label-2); }
-.dot.learning { background: var(--blue); }
+.dot.learning { background: var(--accent); }
 .dot.mastered { background: var(--green); }
 
 /* Tốc độ học */
 .speed-top { display: flex; gap: 16px; margin-bottom: 18px; }
 .speed-top > div { flex: 1; text-align: center; }
-.speed-num { font-size: 1.9rem; font-weight: 700; color: var(--blue); letter-spacing: -0.02em; }
+.speed-num { font-family: var(--font-serif); font-size: 2rem; font-weight: 600; color: var(--accent); letter-spacing: -0.02em; }
 
-/* Biểu đồ cột 7 ngày */
 .chart { display: flex; align-items: flex-end; justify-content: space-between; gap: 6px; height: 110px; }
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
 .bar-val { font-size: 0.7rem; color: var(--label-2); height: 14px; }
-.bar { width: 70%; max-width: 26px; background: var(--blue); border-radius: 6px 6px 0 0; min-height: 3px; transition: height 0.4s ease; }
+.bar { width: 70%; max-width: 26px; background: var(--accent); border-radius: 6px 6px 0 0; min-height: 3px; transition: height 0.4s ease; }
 .bar-day { font-size: 0.65rem; color: var(--label-2); }
 .chart-caption { text-align: center; font-size: 0.75rem; color: var(--label-2); margin-top: 12px; }
 
@@ -277,15 +294,13 @@ input:focus {
   left: 50%;
   bottom: 100px;
   transform: translateX(-50%);
-  background: rgba(28, 28, 30, 0.92);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  color: #fff;
+  background: var(--dark);
+  color: var(--btn-fg);
   padding: 13px 22px;
-  border-radius: 22px;
+  border-radius: 999px;
   font-size: 0.9rem;
   font-weight: 600;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 28px rgba(40, 25, 10, 0.28);
   z-index: 50;
   max-width: 90%;
   text-align: center;
@@ -293,14 +308,14 @@ input:focus {
 }
 @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translateX(-50%); } }
 
-/* Tab bar kính mờ */
+/* Tab bar */
 #tabbar {
   position: fixed;
   bottom: 0; left: 0; right: 0;
   display: flex;
   background: var(--header-bg);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(160%) blur(20px);
+  backdrop-filter: saturate(160%) blur(20px);
   border-top: 0.5px solid var(--sep);
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -321,4 +336,4 @@ input:focus {
   transition: color 0.2s;
 }
 #tabbar button .ic { font-size: 1.3rem; line-height: 1; }
-#tabbar button.active { color: var(--blue); font-weight: 600; }
+#tabbar button.active { color: var(--accent); font-weight: 600; }
