@@ -1,12 +1,7 @@
-// Service worker đơn giản — cache vỏ app để mở được khi offline.
-const CACHE = "vocab-v9";
-const ASSETS = [
-  "./",
-  "index.html",
-  "style.css",
-  "app.js",
-  "manifest.json",
-];
+// Service worker — network-first: luôn lấy bản mới nhất khi có mạng,
+// chỉ dùng cache khi offline. Nhờ vậy cập nhật code không cần xoá cache thủ công.
+const CACHE = "vocab-v10";
+const ASSETS = ["./", "index.html", "style.css", "app.js", "manifest.json"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
@@ -24,11 +19,17 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
-  // Không cache request API — luôn lấy dữ liệu mới từ server.
-  if (url.pathname.startsWith("/api/")) {
-    return;
-  }
+  if (e.request.method !== "GET") return;
+  if (url.pathname.startsWith("/api/")) return; // dữ liệu API: luôn lấy từ server
+
+  // Ưu tiên mạng (bản mới nhất); offline thì rơi về cache đã lưu.
   e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request))
+    fetch(e.request)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy));
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
