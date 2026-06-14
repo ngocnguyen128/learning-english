@@ -17,6 +17,7 @@ import database
 import srs
 import deepseek
 import daily
+import grammar
 
 app = FastAPI(title="Learning English API")
 
@@ -154,6 +155,18 @@ async def daily_ensure():
         return await daily.run_daily_generation()
     except deepseek.DeepSeekError as e:
         raise HTTPException(502, str(e))
+
+
+@app.post("/api/grammar/new")
+async def grammar_new():
+    """Sinh một bài luyện ngữ pháp mới (chủ đề kế tiếp theo lộ trình)."""
+    topic = grammar.current_topic()
+    try:
+        lesson = await deepseek.generate_grammar(topic)
+    except deepseek.DeepSeekError as e:
+        raise HTTPException(502, str(e))
+    grammar.advance()  # chỉ sang chủ đề kế khi soạn bài thành công
+    return lesson
 
 
 @app.get("/api/review/next")

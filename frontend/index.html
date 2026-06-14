@@ -16,6 +16,7 @@
 <body>
   <header>
     <h1>📚 Học Từ Vựng</h1>
+    <button id="open-settings" class="header-btn" aria-label="Cài đặt">⚙️</button>
   </header>
 
   <main id="app">
@@ -143,6 +144,18 @@
         <p class="muted">♂ = giọng nam, ♀ = giọng nữ (nếu máy nhận diện được). Kéo "Độ trầm" về trái để giọng trầm hơn.</p>
       </div>
     </section>
+
+    <!-- TAB: NGỮ PHÁP -->
+    <section id="tab-grammar" class="tab">
+      <h2>Luyện ngữ pháp</h2>
+      <button id="btn-grammar-new" class="btn-primary">📘 Bài ngữ pháp mới</button>
+      <div id="grammar-status" class="muted"></div>
+      <div id="grammar-content">
+        <p class="muted" style="text-align:center;padding:24px">
+          Bấm "Bài ngữ pháp mới" để DeepSeek soạn một điểm ngữ pháp + 5 câu bài tập.
+        </p>
+      </div>
+    </section>
   </main>
 
   <div id="toast" class="toast hidden"></div>
@@ -152,7 +165,7 @@
     <button data-tab="add"><span class="ic">➕</span><span>Thêm</span></button>
     <button data-tab="list"><span class="ic">📋</span><span>Danh sách</span></button>
     <button data-tab="stats"><span class="ic">📊</span><span>Thống kê</span></button>
-    <button data-tab="settings"><span class="ic">⚙️</span><span>Cài đặt</span></button>
+    <button data-tab="grammar"><span class="ic">✏️</span><span>Ngữ pháp</span></button>
   </nav>
 
   <script src="app.js"></script>

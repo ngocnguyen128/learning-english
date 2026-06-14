@@ -128,3 +128,84 @@ async def generate_batch(topic: str, count: int, avoid: list[str] | None = None)
     if not isinstance(words, list):
         raise DeepSeekError("DeepSeek không trả về mảng 'words'")
     return [_normalize(w) for w in words if w.get("word")]
+
+
+GRAMMAR_PROMPT = """Bạn là giáo viên tiếng Anh cho người Việt.
+Hãy soạn một bài luyện NGẮN về điểm ngữ pháp: {topic}.
+
+Trả về DUY NHẤT một object JSON dạng:
+{{
+  "topic": "{topic}",
+  "title": "tên điểm ngữ pháp bằng tiếng Việt, kèm tên tiếng Anh trong ngoặc",
+  "explanation": "giải thích NGẮN 2-4 câu bằng tiếng Việt: khi nào dùng + cấu trúc cơ bản",
+  "questions": [
+    {{
+      "question": "một câu tiếng Anh có đúng một chỗ trống ghi là ___ (hoặc yêu cầu chọn dạng đúng)",
+      "options": ["lựa chọn A", "lựa chọn B", "lựa chọn C", "lựa chọn D"],
+      "answer": 0,
+      "explanation": "giải thích NGẮN bằng tiếng Việt vì sao đáp án đúng"
+    }}
+  ]
+}}
+
+Tạo ĐÚNG 5 câu hỏi trắc nghiệm, mỗi câu 4 lựa chọn, chỉ 1 đáp án đúng.
+"answer" là CHỈ SỐ (0,1,2,3) của đáp án đúng trong mảng "options".
+Độ khó vừa phải, sát thực tế giao tiếp."""
+
+
+async def generate_grammar(topic: str) -> dict:
+    """Sinh một bài luyện ngữ pháp (giải thích + 5 câu trắc nghiệm)."""
+    if not API_KEY:
+        raise DeepSeekError("Chưa cấu hình DEEPSEEK_API_KEY trong file .env")
+
+    payload = {
+        "model": MODEL,
+        "messages": [
+            {"role": "system", "content": "Bạn trả lời chỉ bằng JSON hợp lệ."},
+            {"role": "user", "content": GRAMMAR_PROMPT.format(topic=topic)},
+        ],
+        "response_format": {"type": "json_object"},
+        "temperature": 0.6,
+    }
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+
+    async with httpx.AsyncClient(timeout=120) as client:
+        resp = await client.post(
+            f"{BASE_URL}/chat/completions", json=payload, headers=headers
+        )
+        if resp.status_code != 200:
+            raise DeepSeekError(f"DeepSeek lỗi {resp.status_code}: {resp.text}")
+        data = resp.json()
+
+    try:
+        content = data["choices"][0]["message"]["content"]
+        result = json.loads(content)
+    except (KeyError, IndexError, json.JSONDecodeError) as e:
+        raise DeepSeekError(f"Không đọc được kết quả từ DeepSeek: {e}")
+
+    questions = []
+    for q in result.get("questions", []):
+        opts = q.get("options") or []
+        if not q.get("question") or len(opts) < 2:
+            continue
+        try:
+            ans = int(q.get("answer", 0))
+        except (TypeError, ValueError):
+            ans = 0
+        ans = max(0, min(len(opts) - 1, ans))
+        questions.append({
+            "question": str(q.get("question", "")).strip(),
+            "options": [str(o).strip() for o in opts],
+            "answer": ans,
+            "explanation": str(q.get("explanation", "")).strip(),
+        })
+
+    if not questions:
+        raise DeepSeekError("DeepSeek không trả về câu hỏi hợp lệ")
+
+    return {
+        "topic": result.get("topic", topic),
+        "title": str(result.get("title", topic)).strip(),
+        "explanation": str(result.get("explanation", "")).strip(),
+        "questions": questions,
+    }

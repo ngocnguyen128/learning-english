@@ -25,13 +25,16 @@ function switchTab(name) {
   document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
   document.querySelectorAll("#tabbar button").forEach((b) => b.classList.remove("active"));
   document.getElementById("tab-" + name).classList.add("active");
-  document.querySelector(`#tabbar button[data-tab="${name}"]`).classList.add("active");
+  const tabBtn = document.querySelector(`#tabbar button[data-tab="${name}"]`);
+  if (tabBtn) tabBtn.classList.add("active"); // 'settings' mở từ nút ⚙️, không có nút trên thanh
 
   if (name === "review") loadReview();
   if (name === "list") loadList();
   if (name === "stats") loadStats();
   if (name === "settings") renderVoiceOptions();
 }
+
+document.getElementById("open-settings").addEventListener("click", () => switchTab("settings"));
 
 // ----------------------- API helpers -----------------------
 async function api(path, opts) {
@@ -432,6 +435,72 @@ document.getElementById("voice-test").addEventListener("click", () =>
 if ("speechSynthesis" in window) {
   speechSynthesis.onvoiceschanged = loadVoices;
   loadVoices();
+}
+
+// ----------------------- Luyện ngữ pháp -----------------------
+document.getElementById("btn-grammar-new").addEventListener("click", loadGrammar);
+
+async function loadGrammar() {
+  const btn = document.getElementById("btn-grammar-new");
+  const status = document.getElementById("grammar-status");
+  const content = document.getElementById("grammar-content");
+  btn.disabled = true;
+  status.textContent = "⏳ DeepSeek đang soạn bài...";
+  content.innerHTML = "";
+  try {
+    const g = await api("/api/grammar/new", { method: "POST" });
+    status.textContent = "";
+    renderGrammar(g);
+  } catch (e) {
+    status.textContent = "❌ " + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderGrammar(g) {
+  const content = document.getElementById("grammar-content");
+  const total = g.questions.length;
+  let html = `
+    <div class="info-card grammar-lesson">
+      <div class="g-title">${esc(g.title)}</div>
+      <div class="g-explain">${esc(g.explanation)}</div>
+    </div>
+    <div id="g-score" class="g-score">Trả lời 0/${total} câu</div>`;
+  g.questions.forEach((q, qi) => {
+    html += `<div class="info-card g-q" data-answer="${q.answer}">
+      <div class="g-question">${qi + 1}. ${esc(q.question)}</div>
+      <div class="g-options">
+        ${q.options.map((o, oi) => `<button class="g-opt" data-oi="${oi}">${esc(o)}</button>`).join("")}
+      </div>
+      <div class="g-explain-q hidden">${esc(q.explanation)}</div>
+    </div>`;
+  });
+  content.innerHTML = html;
+
+  let answered = 0;
+  let correct = 0;
+  content.querySelectorAll(".g-q").forEach((qEl) => {
+    const ans = parseInt(qEl.dataset.answer, 10);
+    const opts = qEl.querySelectorAll(".g-opt");
+    opts.forEach((optBtn) => {
+      optBtn.addEventListener("click", () => {
+        if (qEl.classList.contains("done")) return;
+        qEl.classList.add("done");
+        const oi = parseInt(optBtn.dataset.oi, 10);
+        opts[ans].classList.add("correct"); // luôn tô xanh đáp án đúng
+        if (oi === ans) correct++;
+        else optBtn.classList.add("wrong");
+        qEl.querySelector(".g-explain-q").classList.remove("hidden");
+        answered++;
+        const score = document.getElementById("g-score");
+        score.textContent =
+          answered < total
+            ? `Trả lời ${answered}/${total} câu — đúng ${correct}`
+            : `✅ Hoàn thành! Đúng ${correct}/${total} câu`;
+      });
+    });
+  });
 }
 
 // Đăng ký service worker (cho phép cài như app)

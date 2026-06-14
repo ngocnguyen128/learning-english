@@ -1,6 +1,6 @@
 // Service worker — network-first: luôn lấy bản mới nhất khi có mạng,
 // chỉ dùng cache khi offline. Nhờ vậy cập nhật code không cần xoá cache thủ công.
-const CACHE = "vocab-v10";
+const CACHE = "vocab-v11";
 const ASSETS = ["./", "index.html", "style.css", "app.js", "manifest.json"];
 
 self.addEventListener("install", (e) => {

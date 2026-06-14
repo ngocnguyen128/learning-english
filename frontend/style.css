@@ -70,6 +70,18 @@ header h1 {
   font-weight: 600;
   letter-spacing: -0.01em;
 }
+.header-btn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 6px;
+  line-height: 1;
+}
 
 main { padding: 16px; max-width: 600px; margin: 0 auto; }
 
@@ -339,6 +351,49 @@ input:focus {
 .settings input[type="range"] { width: 100%; accent-color: var(--accent); height: 24px; }
 .range-ends { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--label-2); }
 .settings .btn-primary { margin-top: 16px; }
+
+/* Luyện ngữ pháp */
+.grammar-lesson { margin-top: 14px; }
+.g-title { font-family: var(--font-serif); font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
+.g-explain { line-height: 1.55; font-size: 0.95rem; }
+.g-score { text-align: center; font-weight: 600; color: var(--accent); margin: 16px 0 4px; font-size: 0.95rem; }
+.g-q { margin-top: 12px; }
+.g-question { font-weight: 600; margin-bottom: 12px; line-height: 1.5; }
+.g-options { display: flex; flex-direction: column; gap: 8px; }
+.g-opt {
+  text-align: left;
+  background: var(--input-bg);
+  border: 1px solid var(--sep);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--label);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.g-opt:active { transform: scale(0.99); }
+.g-q.done .g-opt { cursor: default; }
+.g-opt.correct {
+  background: color-mix(in srgb, var(--green) 20%, transparent);
+  border-color: var(--green);
+  color: var(--green);
+  font-weight: 600;
+}
+.g-opt.wrong {
+  background: color-mix(in srgb, #c75b4a 18%, transparent);
+  border-color: #c75b4a;
+  color: #c75b4a;
+}
+.g-explain-q {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--label);
+  line-height: 1.5;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  border-radius: 10px;
+}
 
 /* Toast */
 .toast {
