@@ -5,6 +5,17 @@ let reviewQueue = [];
 let currentCard = null;
 let practiceMode = false; // true = luyện tập ngẫu nhiên (không đụng lịch SRS)
 
+// Cài đặt giọng đọc (lưu trong máy)
+let enVoices = [];
+const savedVoice = JSON.parse(localStorage.getItem("voiceSettings") || "{}");
+let voicePref = {
+  uri: savedVoice.uri || "",
+  pitch: savedVoice.pitch ?? 0.8, // mặc định hơi trầm
+  rate: savedVoice.rate ?? 0.9,
+};
+const MALE_HINT = /male|david|mark|daniel|aaron|fred|alex|rishi|guy|james|george|arthur|ryan|eric|tom/i;
+const FEMALE_HINT = /female|zira|samantha|victoria|karen|moira|tessa|fiona|susan|hazel|jenny|aria/i;
+
 // ----------------------- Điều hướng tab -----------------------
 document.querySelectorAll("#tabbar button").forEach((btn) => {
   btn.addEventListener("click", () => switchTab(btn.dataset.tab));
@@ -19,6 +30,7 @@ function switchTab(name) {
   if (name === "review") loadReview();
   if (name === "list") loadList();
   if (name === "stats") loadStats();
+  if (name === "settings") renderVoiceOptions();
 }
 
 // ----------------------- API helpers -----------------------
@@ -95,7 +107,10 @@ function speak(text) {
   if (!("speechSynthesis" in window) || !text) return;
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "en-US";
-  u.rate = 0.9;
+  u.pitch = voicePref.pitch; // thấp = trầm hơn
+  u.rate = voicePref.rate;
+  const v = enVoices.find((x) => x.voiceURI === voicePref.uri);
+  if (v) u.voice = v;
   speechSynthesis.cancel(); // dừng câu đang đọc nếu có
   speechSynthesis.speak(u);
 }
@@ -315,6 +330,66 @@ async function ensureDailyWords() {
     // Im lặng — không để lỗi sinh từ làm gián đoạn việc dùng app
     console.warn("Sinh từ mới thất bại:", e.message);
   }
+}
+
+// ----------------------- Cài đặt giọng đọc -----------------------
+function loadVoices() {
+  if (!("speechSynthesis" in window)) return;
+  enVoices = speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith("en"));
+  // Chưa chọn giọng → tự ưu tiên giọng nam nếu tìm được
+  if (!voicePref.uri && enVoices.length) {
+    const male = enVoices.find((v) => MALE_HINT.test(v.name));
+    voicePref.uri = (male || enVoices[0]).voiceURI;
+  }
+  renderVoiceOptions();
+}
+
+function renderVoiceOptions() {
+  const sel = document.getElementById("voice-select");
+  if (!sel) return;
+  if (!enVoices.length) {
+    sel.innerHTML = `<option>(Máy chưa có giọng tiếng Anh)</option>`;
+  } else {
+    sel.innerHTML = enVoices
+      .map((v) => {
+        const tag = MALE_HINT.test(v.name) ? " ♂" : FEMALE_HINT.test(v.name) ? " ♀" : "";
+        const selected = v.voiceURI === voicePref.uri ? "selected" : "";
+        return `<option value="${esc(v.voiceURI)}" ${selected}>${esc(v.name)}${tag}</option>`;
+      })
+      .join("");
+  }
+  const pr = document.getElementById("pitch-range");
+  const rr = document.getElementById("rate-range");
+  if (pr) { pr.value = voicePref.pitch; document.getElementById("pitch-val").textContent = voicePref.pitch.toFixed(1); }
+  if (rr) { rr.value = voicePref.rate; document.getElementById("rate-val").textContent = voicePref.rate.toFixed(1); }
+}
+
+function saveVoice() {
+  localStorage.setItem("voiceSettings", JSON.stringify(voicePref));
+}
+
+document.getElementById("voice-select").addEventListener("change", (e) => {
+  voicePref.uri = e.target.value;
+  saveVoice();
+  speak("Hello"); // nghe thử ngay khi đổi giọng
+});
+document.getElementById("pitch-range").addEventListener("input", (e) => {
+  voicePref.pitch = parseFloat(e.target.value);
+  document.getElementById("pitch-val").textContent = voicePref.pitch.toFixed(1);
+  saveVoice();
+});
+document.getElementById("rate-range").addEventListener("input", (e) => {
+  voicePref.rate = parseFloat(e.target.value);
+  document.getElementById("rate-val").textContent = voicePref.rate.toFixed(1);
+  saveVoice();
+});
+document.getElementById("voice-test").addEventListener("click", () =>
+  speak("Hello, this is the voice you will learn with.")
+);
+
+if ("speechSynthesis" in window) {
+  speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
 }
 
 // Đăng ký service worker (cho phép cài như app)

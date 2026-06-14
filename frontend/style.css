@@ -288,6 +288,25 @@ input:focus {
 .bar-day { font-size: 0.65rem; color: var(--label-2); }
 .chart-caption { text-align: center; font-size: 0.75rem; color: var(--label-2); margin-top: 12px; }
 
+/* Cài đặt giọng đọc */
+.settings .set-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--sep); }
+.settings .set-row.col { flex-direction: column; align-items: stretch; gap: 8px; }
+.settings .set-row span { font-size: 0.95rem; font-weight: 500; }
+.settings .set-row small { color: var(--accent); font-weight: 600; margin-left: 4px; }
+.settings select {
+  background: var(--input-bg);
+  border: 1px solid var(--sep);
+  border-radius: 12px;
+  padding: 9px 12px;
+  color: var(--label);
+  font-family: inherit;
+  font-size: 0.9rem;
+  max-width: 62%;
+}
+.settings input[type="range"] { width: 100%; accent-color: var(--accent); height: 24px; }
+.range-ends { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--label-2); }
+.settings .btn-primary { margin-top: 16px; }
+
 /* Toast */
 .toast {
   position: fixed;
@@ -323,8 +342,8 @@ input:focus {
   flex: 1;
   background: none;
   border: none;
-  padding: 9px 4px 7px;
-  font-size: 0.68rem;
+  padding: 9px 2px 7px;
+  font-size: 0.62rem;
   font-family: inherit;
   font-weight: 500;
   color: var(--label-2);
@@ -333,6 +352,7 @@ input:focus {
   flex-direction: column;
   align-items: center;
   gap: 3px;
+  white-space: nowrap;
   transition: color 0.2s;
 }
 #tabbar button .ic { font-size: 1.3rem; line-height: 1; }
